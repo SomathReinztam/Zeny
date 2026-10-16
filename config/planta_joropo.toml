@@ -1,0 +1,165 @@
+# ==============================================================================
+
+# CONFIGURACIÓN TÉCNICA DE EQUIPOS - PROYECTO JOROPO (ZENTRACK SAS)
+
+# ==============================================================================
+
+# Este archivo proporciona la memoria descriptiva, especificaciones de hardware,
+
+# orígenes de datos y reglas operativas al agente de IA para el análisis de telemetría.
+
+[proyecto]
+nombre = "Proyecto Solar Joropo"
+cliente = "Zentrack SAS"
+periodo_evaluacion = "Septiembre 2026"
+ubicacion = "Colombia"
+# Potencia instalada (pico fotovoltaico, kW). Dato aportado por operación el 2026-10-09.
+potencia_instalada_kw = 1034.9
+tipo_instalacion = "Minigranja Solar Fotovoltaica con Seguimiento Axis Único"
+directorio_reportes = "Reportes-minigranja-Joropo"
+
+# ==============================================================================
+
+# 0. MAPEO DE ARCHIVOS DE FUENTE DE DATOS (EXCEL)
+
+# ==============================================================================
+
+[fuentes_datos.excel]
+trackers_electricos = "brain_electrics2026-09-01-2026-09-30.xlsx"
+trackers_posicion   = "reporte_posicion_2026-09-01-2026-09-30.xlsx"
+inversores_generacion = "inversores_generacion_2026-09-01-2026-09-30.xlsx"
+estacion_clima      = "reporte_clima2026-09-01-2026-09-30.xlsx"
+subestacion_shelter = "quoia_mediciones_2026-09-01-2026-09-30.xlsx"
+
+# ==============================================================================
+
+# 1. SUBESTACIÓN DE ENTREGA A LA RED (SHELTER)
+
+# ==============================================================================
+
+[equipos.subestacion]
+cantidad = 1
+nombre = "Subestación Tipo Shelter"
+funcion = "Medición de energía exportada a la red eléctrica y parámetros del punto de interconexión"
+archivo_origen = "quoia_mediciones_2026-09-01-2026-09-30.xlsx"
+
+[instrucciones_agente.subestacion]
+regla_analisis = """
+La subestación tipo Shelter (datos en quoia_mediciones_*.xlsx) registra la energía neta real entregada a la red.
+Compara siempre la generación bruta de la suma de inversores con la energía exportada registrada por la subestación para calcular las pérdidas en cableado de CA, transformadores de evacuación o consumo propio.
+"""
+
+# ==============================================================================
+
+# 2. INVERSORES SOLARES
+
+# ==============================================================================
+
+[equipos.inversores]
+cantidad_total = 5
+monitoreo_individual = false
+potencia_nominal_planta_kw = 990.0
+fabricante_predominante = "Huawei (Serie SUN2000 / KTL)"
+archivo_origen = "inversores_generacion_2026-09-01-2026-09-30.xlsx"
+
+[equipos.inversores.lista]
+inversor_1 = { nombre = "300KTL-Inversor1", modelo = "Huawei 300KTL", potencia_nominal_kw = 300.0 }
+inversor_2 = { nombre = "300KTL-Inversor2", modelo = "Huawei 300KTL", potencia_nominal_kw = 300.0 }
+inversor_3 = { nombre = "300KTL-Inversor3", modelo = "Huawei 300KTL", potencia_nominal_kw = 300.0 }
+inversor_4 = { nombre = "50KTL-Inversor4",  modelo = "Huawei 50KTL",  potencia_nominal_kw = 50.0 }
+inversor_5 = { nombre = "40KTL-Inversor5",  modelo = "Huawei 40KTL",  potencia_nominal_kw = 40.0 }
+
+[instrucciones_agente.inversores]
+regla_analisis = """
+IMPORTANTE: El archivo inversores_generacion_*.xlsx contiene únicamente la medición de generación TOTAL/AGREGADA de la planta.
+No se dispone de datos discriminados por cada uno de los 5 inversores.
+Evalúa el rendimiento de generación comparando la potencia activa registrada contra la capacidad máxima combinada de 990.0 kW y la irradiancia POA recibida.
+"""
+
+# ==============================================================================
+
+# 3. SEGUIDORES SOLARES (TRACKERS)
+
+# ==============================================================================
+
+[equipos.seguidores_solares]
+cantidad_total = 26
+angulo_minimo_deg = -60.0
+angulo_maximo_deg = 60.0
+tolerancia_desviacion_deg = 2.0
+posicion_defensa_viento_deg = 0.0
+archivo_origen_electricos = "brain_electrics2026-09-01-2026-09-30.xlsx"
+archivo_origen_posicion   = "reporte_posicion_2026-09-01-2026-09-30.xlsx"
+
+[equipos.seguidores_solares.lista]
+tracker_01 = { nombre = "Tracker 1",  mac_id = "EFF378" }
+tracker_02 = { nombre = "Tracker 2",  mac_id = "EFF19C" }
+tracker_03 = { nombre = "Tracker 3",  mac_id = "EFF3E0" }
+tracker_04 = { nombre = "Tracker 4",  mac_id = "E77F6C" }
+tracker_05 = { nombre = "Tracker 5",  mac_id = "B04754" }
+tracker_06 = { nombre = "Tracker 6",  mac_id = "EFF2C4" }
+tracker_07 = { nombre = "Tracker 7",  mac_id = "EFF140" }
+tracker_08 = { nombre = "Tracker 8",  mac_id = "EFF3B0" }
+tracker_09 = { nombre = "Tracker 9",  mac_id = "EFF26C" }
+tracker_10 = { nombre = "Tracker 10", mac_id = "EFF454" }
+tracker_11 = { nombre = "Tracker 11", mac_id = "63A4D8" }
+tracker_12 = { nombre = "Tracker 12", mac_id = "EFF414" }
+tracker_13 = { nombre = "Tracker 13", mac_id = "EFF3F4" }
+tracker_14 = { nombre = "Tracker 14", mac_id = "EFF350" }
+tracker_15 = { nombre = "Tracker 15", mac_id = "EFF3A4" }
+tracker_16 = { nombre = "Tracker 16", mac_id = "EFF290" }
+tracker_17 = { nombre = "Tracker 17", mac_id = "EFF138" }
+tracker_18 = { nombre = "Tracker 18", mac_id = "EFF2B8" }
+tracker_19 = { nombre = "Tracker 19", mac_id = "EFF2B4" }
+tracker_20 = { nombre = "Tracker 20", mac_id = "437DF0" }
+tracker_21 = { nombre = "Tracker 21", mac_id = "B04750" }
+tracker_22 = { nombre = "Tracker 22", mac_id = "EFF314" }
+tracker_23 = { nombre = "Tracker 23", mac_id = "EFF1A8" }
+tracker_24 = { nombre = "Tracker 24", mac_id = "EFF38C" }
+tracker_25 = { nombre = "Tracker 25", mac_id = "EFF198" }
+tracker_26 = { nombre = "Tracker 26", mac_id = "EFF310" }
+
+[instrucciones_agente.seguidores_solares]
+regla_analisis = """
+
+Mapea las identificaciones de hardware de 6 caracteres (extraídas de las direcciones MAC, como EFF378) con su respectivo 'Tracker X'.
+
+Cruza la información del archivo de posición (reporte_posicion_.xlsx) con el de parámetros eléctricos (brain_electrics_.xlsx) para detectar picos atípicos de corriente durante el movimiento de los motores.
+
+Si el ángulo real de un seguidor se desvía más de 2.0° con respecto al ángulo objetivo en horas de sol, reporta una falla de seguimiento.
+"""
+
+# ==============================================================================
+
+# 4. ESTACIÓN METEOROLÓGICA
+
+# ==============================================================================
+
+[equipos.estacion_meteorologica]
+cantidad = 1
+nombre = "Estación Meteorológica Central Joropo"
+archivo_origen = "reporte_clima2026-09-01-2026-09-30.xlsx"
+
+[equipos.estacion_meteorologica.sensores]
+anemometro_velocidad = { tipo = "Anemómetro", unidad = "m/s", umbral_alerta_viento_fuerte = 15.0 }
+anemometro_direccion = { tipo = "Veleta", unidad = "grados" }
+pluviometro = { tipo = "Pluviómetro", unidad = "mm" }
+piranometro_ghi = { tipo = "Piranómetro GHI (Global Horizontal)", unidad = "W/m²" }
+piranometro_poa = { tipo = "Piranómetro POA (Plane of Array)", unidad = "W/m²" }
+temperatura_ambiente = { tipo = "Sensor Temperatura Ambiente", unidad = "°C" }
+temperatura_panel = { tipo = "Sensor Temperatura de Módulo (Back-of-module)", unidad = "°C", coeficiente_perdida_pct_c = 0.35, umbral_efecto_termico_c = 60.0 }
+sensor_soiling = { tipo = "Sensor de Soiling / Suciedad", unidad = "%", umbral_lavado_critico_pct = 5.0 }
+
+[instrucciones_agente.estacion_meteorologica]
+reglas_analisis = """
+
+PR Y RENDIMIENTO: Utiliza la irradiancia POA (Plane of Array) de reporte_clima_*.xlsx como la referencia principal de energía incidente para evaluar el desempeño fotovoltaico.
+
+SUCIEDAD / SOILING: Si las pérdidas por suciedad del sensor de soiling superan el 5.0%, genera automáticamente una sugerencia para programar lavado de paneles.
+
+EFECTO TÉRMICO: Considera las pérdidas por temperatura de panel en horas pico si la temperatura del módulo supera los 60 °C.
+
+PROTECCIÓN POR VIENTO: Si la velocidad del viento supera los 15 m/s, comprueba la activación del modo de defensa en los seguidores solares (posición horizontal de 0.0°).
+
+AUTO-LIMPIEZA: Correlaciona los eventos de lluvia registrados por el pluviómetro con reducciones naturales del porcentaje de suciedad (soiling).
+"""

@@ -1,0 +1,371 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Tokens de marca Zentrack (Manual_marca.toml)
+   Naranja Solar #FD9C10 · Gris Sólido #797979 · Negro suave #1A1A1A
+   Modo claro prioritario; modo oscuro según preferencia del sistema.
+   ============================================================ */
+:root {
+  --brand-orange: #fd9c10;
+  --brand-orange-strong: #e8890c;
+  --brand-orange-ink: #9a5800; /* texto naranja legible sobre claro */
+  --brand-gray: #797979;
+  --brand-black: #1a1a1a;
+  --brand-smoke: #f2f2f2;
+
+  --bg: #f5f4f1;
+  --bg-grad-a: #fff7ea;
+  --bg-grad-b: #f5f4f1;
+  --surface: #ffffff;
+  --surface-2: #faf9f7;
+  --surface-sunk: #f2f1ee;
+  --line: #e7e4de;
+  --line-strong: #d6d2ca;
+  --grid: #eeebe6;
+
+  --ink: #1a1a1a;
+  --ink-2: #4a4a4a;
+  --ink-3: #797979;
+
+  --accent: var(--brand-orange);
+  --accent-soft: #fff1db;
+  --accent-ring: rgba(253, 156, 16, 0.35);
+
+  --ok: #15803d;
+  --ok-soft: #e9f7ee;
+  --warn: #b45309;
+  --warn-soft: #fff4e0;
+  --crit: #c0262d;
+  --crit-soft: #fdecec;
+  --info: #2563eb;
+  --info-soft: #eef4ff;
+
+  /* Paleta categórica de series (validada CVD, orden fijo) */
+  --s1: #e8890c;
+  --s2: #2563eb;
+  --s3: #0e9f87;
+  --s4: #8b5cf6;
+  --s5: #c2410c;
+  --s6: #0891b2;
+
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow-card: 0 1px 2px rgba(26, 26, 26, 0.04), 0 6px 20px -8px rgba(26, 26, 26, 0.12);
+  --shadow-pop: 0 10px 30px -10px rgba(26, 26, 26, 0.25);
+
+  /* CopilotKit */
+  --copilot-kit-primary-color: var(--brand-black);
+  --copilot-kit-contrast-color: #ffffff;
+  --copilot-kit-background-color: var(--surface);
+  --copilot-kit-input-background-color: var(--surface-2);
+  --copilot-kit-secondary-color: var(--surface-2);
+  --copilot-kit-secondary-contrast-color: var(--ink);
+  --copilot-kit-separator-color: var(--line);
+  --copilot-kit-muted-color: var(--ink-3);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121212;
+    --bg-grad-a: #1d1710;
+    --bg-grad-b: #121212;
+    --surface: #1a1a1a;
+    --surface-2: #222222;
+    --surface-sunk: #161616;
+    --line: #333333;
+    --line-strong: #444444;
+    --grid: #2a2a2a;
+    --ink: #f2f2f2;
+    --ink-2: #cfcfcf;
+    --ink-3: #9a9a9a;
+    --brand-orange-ink: #fdb24a;
+    --accent-soft: #33240d;
+    --ok: #4ade80;
+    --ok-soft: #12261a;
+    --warn: #fbbf24;
+    --warn-soft: #2d2410;
+    --crit: #f87171;
+    --crit-soft: #2e1414;
+    --info: #7aa7ff;
+    --info-soft: #141f33;
+    --s1: #fd9c10;
+    --s2: #5b8def;
+    --s3: #2bb89f;
+    --s4: #a78bfa;
+    --s5: #ea6a3a;
+    --s6: #22b3d1;
+    --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    --copilot-kit-primary-color: var(--brand-orange);
+    --copilot-kit-contrast-color: #1a1a1a;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-sunk: var(--surface-sunk);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--brand-orange-ink);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-crit: var(--crit);
+  --color-crit-soft: var(--crit-soft);
+  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-display: var(--font-outfit), "Outfit", var(--font-inter), system-ui, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(1200px 500px at 0% -10%, var(--bg-grad-a), transparent 60%),
+    var(--bg-grad-b);
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------ animaciones */
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes card-flash {
+  0% {
+    box-shadow: 0 0 0 0 var(--accent-ring);
+    opacity: 1;
+  }
+  60% {
+    box-shadow: 0 0 0 6px var(--accent-ring);
+    opacity: 1;
+  }
+  100% {
+    box-shadow: 0 0 0 10px transparent;
+    opacity: 0;
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+}
+@keyframes shimmer {
+  from {
+    background-position: -400px 0;
+  }
+  to {
+    background-position: 400px 0;
+  }
+}
+@keyframes pulse-dot {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.6);
+    opacity: 0.4;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes sun-rays {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.anim-card-in {
+  animation: card-in 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.card-flash {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  animation: card-flash 1.6s ease-out both;
+}
+.anim-float {
+  animation: float 5s ease-in-out infinite;
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-sunk) 0%, var(--surface-2) 50%, var(--surface-sunk) 100%);
+  background-size: 800px 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+.pulse-dot {
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+.spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 2px solid var(--accent-soft);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+  flex: none;
+}
+.spinner-sm {
+  width: 12px;
+  height: 12px;
+  border-width: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-card-in,
+  .anim-float,
+  .card-flash,
+  .skeleton,
+  .pulse-dot {
+    animation: none !important;
+  }
+}
+
+/* Scrollbars discretas */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+/* ------------------------------------------------------------ CopilotKit */
+.zeny-chat {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.zeny-chat .copilotKitChat {
+  height: 100%;
+  font-family: var(--font-sans);
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+}
+.zeny-chat .copilotKitMessages {
+  background: transparent;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+.zeny-chat .copilotKitMessagesContainer {
+  padding: 1rem 18px;
+}
+.zeny-chat .copilotKitMessage {
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+.zeny-chat .copilotKitMessage.copilotKitUserMessage {
+  border-radius: 16px 16px 4px 16px;
+  font-size: 0.95rem;
+  padding: 10px 14px;
+  max-width: 85%;
+}
+.zeny-chat .copilotKitMessage.copilotKitAssistantMessage {
+  width: 100%;
+}
+.zeny-chat .copilotKitMarkdownElement strong {
+  font-weight: 650;
+}
+.zeny-chat .copilotKitMarkdownElement ul,
+.zeny-chat .copilotKitMarkdownElement ol {
+  padding-left: 1.2rem;
+}
+.zeny-chat .copilotKitMarkdownElement ul {
+  list-style: disc;
+}
+.zeny-chat .copilotKitMarkdownElement ol {
+  list-style: decimal;
+}
+.zeny-chat .copilotKitInputContainer {
+  background: transparent;
+  padding-bottom: 12px;
+}
+.zeny-chat .copilotKitInput {
+  border-radius: 16px;
+  border-color: var(--line-strong);
+  background: var(--surface);
+  min-height: 64px;
+  width: calc(100% - 28px);
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.zeny-chat .copilotKitInput:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-ring);
+}
+.zeny-chat .copilotKitInput textarea {
+  font-size: 1rem;
+  color: var(--ink);
+}
+.zeny-chat .copilotKitMessages footer .suggestions {
+  gap: 8px;
+  padding: 0 4px;
+}
+.zeny-chat .copilotKitMessages footer .suggestions .suggestion {
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 0.85rem;
+  padding: 7px 12px;
+  box-shadow: none;
+  transition: all 0.15s;
+}
+.zeny-chat .copilotKitMessages footer .suggestions .suggestion:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--ink);
+  transform: none;
+}
+/* Sin badges/consolas de desarrollo en la demo */
+.copilotKitDevConsole,
+.copilotKitVersionInfo {
+  display: none !important;
+}
+/* Sugerencias en una sola fila desplazable para no robar alto al chat */
+.zeny-chat .copilotKitMessages footer .suggestions {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+  mask-image: linear-gradient(90deg, #000 85%, transparent);
+}
+.zeny-chat .copilotKitMessages footer .suggestions .suggestion {
+  white-space: nowrap;
+  flex: none;
+}
