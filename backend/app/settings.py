@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     thinking_main: bool = True
     thinking_sql: bool = True
     gemini_thinking_budget: int = 1024
+    llm_timeout_s: float = 900
+    # Timeout entre chunks del stream (langchain-openai). None = desactivado (recomendado para la EVO).
+    stream_chunk_timeout_s: float | None = None
     google_api_key: str | None = None
     gemini_model: str = "gemini-3.5-flash"
 
