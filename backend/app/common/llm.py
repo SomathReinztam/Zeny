@@ -48,6 +48,10 @@ def make_llm(role: str = "main") -> BaseChatModel:
             model=settings.gemini_model,
             google_api_key=settings.google_api_key,
             temperature=0.2,
+            # Sin timeout, un stream de Gemini que se estanca (TCP vivo pero sin datos) cuelga la
+            # corrida para SIEMPRE. Con timeout + unos reintentos, falla rápido y se registra.
+            timeout=settings.gemini_timeout_s,
+            max_retries=settings.gemini_max_retries,
             **kwargs,
         )
 
