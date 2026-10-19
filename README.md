@@ -62,6 +62,3 @@ cd ../pgDataBase && docker compose down -v
 ```
 
 
-## Documentos
-- [`docs/PLAN.md`](docs/PLAN.md): plan, arquitectura y estado (§12).
-- [`docs/CONTRATO_UI.md`](docs/CONTRATO_UI.md): contrato AG-UI entre backend y frontend.
