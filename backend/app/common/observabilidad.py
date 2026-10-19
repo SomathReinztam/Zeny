@@ -12,25 +12,46 @@ Ambas se enchufan como callbacks de LangChain, que se propagan a subagentes y to
 import logging
 import os
 import sys
+from logging.handlers import RotatingFileHandler
+from pathlib import Path
 
 from langchain_core.callbacks import BaseCallbackHandler
 
-from app.settings import settings
+from app.settings import ROOT, settings
 
 log = logging.getLogger("zeny")
 
+_FORMATO = logging.Formatter("%(asctime)s %(levelname)-7s %(name)s | %(message)s", "%H:%M:%S")
+
 
 def configurar_logging() -> None:
-    """Configura el logger 'zeny' hacia stdout. Idempotente (sobrevive a --reload)."""
+    """Configura el logger 'zeny' hacia stdout y a un archivo rotado. Idempotente (sobrevive a --reload).
+
+    El archivo (por defecto <repo>/logs/zeny.log, en Docker /app/logs montado en ./logs del host) deja ver
+    los logs sin entrar al contenedor. Si el directorio no es escribible, se sigue solo con stdout.
+    """
     nivel = getattr(logging, settings.log_level.upper(), logging.INFO)
     root = logging.getLogger()
+
     if not any(getattr(h, "_zeny", False) for h in root.handlers):
-        handler = logging.StreamHandler(sys.stdout)
-        handler.setFormatter(
-            logging.Formatter("%(asctime)s %(levelname)-7s %(name)s | %(message)s", "%H:%M:%S")
-        )
-        handler._zeny = True  # type: ignore[attr-defined]
-        root.addHandler(handler)
+        stdout = logging.StreamHandler(sys.stdout)
+        stdout.setFormatter(_FORMATO)
+        stdout._zeny = True  # type: ignore[attr-defined]
+        root.addHandler(stdout)
+
+    if not any(getattr(h, "_zeny_file", False) for h in root.handlers):
+        try:
+            carpeta = Path(settings.log_dir) if settings.log_dir else ROOT / "logs"
+            carpeta.mkdir(parents=True, exist_ok=True)
+            archivo = RotatingFileHandler(
+                carpeta / "zeny.log", maxBytes=5_000_000, backupCount=5, encoding="utf-8"
+            )
+            archivo.setFormatter(_FORMATO)
+            archivo._zeny_file = True  # type: ignore[attr-defined]
+            root.addHandler(archivo)
+        except OSError as e:  # noqa: BLE001 — sin archivo seguimos con stdout
+            log.warning("No se pudo abrir el archivo de log (%r); se usa solo stdout.", e)
+
     root.setLevel(min(nivel, logging.INFO))
     log.setLevel(nivel)
 

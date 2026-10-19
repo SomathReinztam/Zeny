@@ -82,3 +82,15 @@ NEXT_PUBLIC_AGUI_URL=http://192.168.X.Y:8100/agui docker compose up -d --build f
   con `make docker-etl`. Monta los `.xlsx` de solo lectura desde `./docs/data` (relativo al repo,
   ignorado por git) hacia `/data` en el contenedor. Para cargar otros datos, deja los `.xlsx` ahí.
 - La pila de Langfuse usa volúmenes nombrados propios (`zeny-langfuse_langfuse_*`); no toca los de la app.
+
+## Logs
+
+El backend escribe a **stdout** y a **`./logs/zeny.log`** (rotado, 5 MB × 5). Dos formas de verlos
+sin entrar al contenedor:
+
+```bash
+docker compose logs -f backend     # en vivo, desde Docker
+tail -f logs/zeny.log              # el archivo en el host (volumen ./logs:/app/logs)
+```
+
+La carpeta `logs/` está en `.gitignore`. La traza rica (razonamiento, tools, SQL, 429) va a Langfuse.

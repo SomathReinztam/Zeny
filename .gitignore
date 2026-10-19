@@ -229,3 +229,6 @@ z3.py
 z.txt
 
 data/
+
+# Logs de la app (se montan en ./logs)
+logs/

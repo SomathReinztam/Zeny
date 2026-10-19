@@ -33,6 +33,8 @@ class Settings(BaseSettings):
 
     # Observabilidad
     log_level: str = "INFO"
+    # Carpeta de logs; vacío = <repo>/logs. En Docker se fija a /app/logs (montado en ./logs del host).
+    log_dir: str | None = None
     langfuse_public_key: str | None = None
     langfuse_secret_key: str | None = None
     langfuse_host: str = "http://localhost:3010"

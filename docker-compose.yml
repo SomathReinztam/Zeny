@@ -28,6 +28,11 @@ services:
       DB_PORT: "5434"
       # Langfuse corre en infra/langfuse.yml, publicado en el host en 3010.
       LANGFUSE_HOST: http://host.docker.internal:3010
+      # Logs a archivo dentro del contenedor, visibles en ./logs del host (ver volumes).
+      LOG_DIR: /app/logs
+    # Los logs quedan en ./logs/zeny.log del host (además de `docker compose logs -f backend`).
+    volumes:
+      - ./logs:/app/logs
 
   frontend:
     build:

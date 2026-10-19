@@ -25,6 +25,7 @@ frontend
 
 # Datos y documentación pesada (los datos se montan como volumen en el ETL, no van en la imagen)
 data
+logs
 docs/data
 docs/*.sse
 *.mkv
