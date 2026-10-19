@@ -17,6 +17,7 @@ dependencies = [
     "uvicorn[standard]>=0.30",
     "pydantic-settings>=2.3",
     "python-dotenv>=1.0",
+    "langfuse>=3,<4",
 ]
 
 [tool.uv]

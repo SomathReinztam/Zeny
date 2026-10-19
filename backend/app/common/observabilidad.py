@@ -10,6 +10,7 @@ Dos capas complementarias:
 Ambas se enchufan como callbacks de LangChain, que se propagan a subagentes y tools.
 """
 import logging
+import os
 import sys
 
 from langchain_core.callbacks import BaseCallbackHandler
@@ -69,6 +70,11 @@ def _langfuse_handler():
     """Devuelve el callback de Langfuse si hay credenciales, o None. Soporta SDK v3 y v2."""
     if not (settings.langfuse_public_key and settings.langfuse_secret_key):
         return None
+    # El SDK v3 lee las claves de las variables de entorno del proceso. En local vienen del .env
+    # (vía pydantic) y no quedan exportadas, así que las exportamos aquí antes de construirlo.
+    os.environ.setdefault("LANGFUSE_PUBLIC_KEY", settings.langfuse_public_key)
+    os.environ.setdefault("LANGFUSE_SECRET_KEY", settings.langfuse_secret_key)
+    os.environ.setdefault("LANGFUSE_HOST", settings.langfuse_host)
     try:
         try:
             from langfuse.langchain import CallbackHandler  # SDK v3+ (lee claves del entorno)
