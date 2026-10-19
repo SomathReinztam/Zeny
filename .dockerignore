@@ -1,0 +1,37 @@
+# No metas secretos ni basura pesada en la imagen del backend/ETL.
+.env
+.env.*
+!.env.example
+
+# Entornos y cachés de Python
+.venv
+venv
+env
+__pycache__
+*.py[codz]
+.pytest_cache
+.ruff_cache
+.mypy_cache
+
+# Control de versiones y metadatos
+.git
+.gitignore
+
+# Frontend (tiene su propia imagen)
+node_modules
+frontend/node_modules
+frontend/.next
+frontend
+
+# Datos y documentación pesada (los datos se montan como volumen en el ETL)
+data
+docs/*.sse
+*.mkv
+
+# Mis cosas
+_docs/
+.txt
+z1.py
+z2.py
+z3.py
+z.txt

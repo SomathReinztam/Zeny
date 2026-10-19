@@ -1,0 +1,65 @@
+# Compose de la app Zeny (backend AG-UI + frontend + ETL).
+#
+# El Postgres NO está aquí: ya corre en ../pgDataBase como contenedor `zeny-db`,
+# publicado en el host en el 5434 (volumen externo pgdatabase_zeny_agent_db).
+# Los contenedores llegan a Postgres y a la EVO (LLM) a través del host con
+# host.docker.internal, por eso NO se comparte red con pgDataBase ni se migra el volumen.
+#
+# Requisito: `../pgDataBase` levantado  →  cd ../pgDataBase && docker compose up -d
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: zeny-backend
+    restart: unless-stopped
+    ports:
+      - "8100:8100"
+    # Permite resolver el host desde el contenedor (Postgres y EVO viven en el host/VPN).
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # Toma todas las variables del .env del repo (LLM_*, GOOGLE_API_KEY, MODEL_*,
+    # THINKING_*, ZENY_LECTOR_PASS, LANGFUSE_PUBLIC_KEY/SECRET_KEY, LOG_LEVEL, etc.)...
+    env_file:
+      - .env
+    # ...y sobreescribe lo que cambia dentro de Docker (las env del compose ganan).
+    environment:
+      DB_HOST: host.docker.internal
+      DB_PORT: "5434"
+      # Langfuse corre en infra/langfuse.yml, publicado en el host en 3010.
+      LANGFUSE_HOST: http://host.docker.internal:3010
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # NEXT_PUBLIC_AGUI_URL se hornea en el build (lo usa el navegador).
+        # Para tablets: exporta NEXT_PUBLIC_AGUI_URL=http://IP_DEL_HOST:8100/agui antes de `make up`.
+        NEXT_PUBLIC_AGUI_URL: ${NEXT_PUBLIC_AGUI_URL:-http://localhost:8100/agui}
+    image: zeny-frontend
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    depends_on:
+      - backend
+
+  # Herramienta de carga: misma imagen que el backend, pero NO arranca con `up`.
+  # Correr con:  docker compose run --rm etl   (o  docker compose --profile tools up etl)
+  etl:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: zeny-backend
+    profiles: ["tools"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - .env
+    environment:
+      DB_HOST: host.docker.internal
+      DB_PORT: "5434"
+    # Los .xlsx están FUERA del repo: se montan de solo lectura.
+    volumes:
+      - /home/somath/Documents/dev/Zentrack/data/Reportes-minigranja-Joropo:/data/Reportes-minigranja-Joropo:ro
+    command: python -m etl.cargar_xlsx --dir /data/Reportes-minigranja-Joropo
