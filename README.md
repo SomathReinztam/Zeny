@@ -14,15 +14,27 @@ Navegador :3002 (Next.js + CopilotKit)  ──AG-UI──►  Backend :8100 (Fas
 ## Arranque
 
 ```bash
-cp .env.example .env        # credenciales de zeny-db, ZENY_LECTOR_PASS, LLM
-make install                # uv sync + npm install
-make etl                    # carga ../data/Reportes-minigranja-Joropo (idempotente)
-make backend                # LLM según .env  (o: make backend-gemini)
-make frontend               # http://localhost:3002   (?demo=1 sin backend, ?q=pregunta)
-make probar Q="¿Hay trackers con problemas?"   # prueba por consola, sin frontend
+# 0. Postgres: Levantar postgres 
+cd ../pgDataBase && docker compose up -d
+
+# 1. Crear la base `langfuse` dentro de zeny-db (solo la primera vez)
+make langfuse-db
+
+# 2. Levantar Langfuse — la PRIMERA vez descarga ClickHouse/MinIO/Redis (varios GB)
+make langfuse-up
+#    → abre http://localhost:3010, crea cuenta + proyecto,
+#      copia la public key y secret key a LANGFUSE_PUBLIC_KEY / LANGFUSE_SECRET_KEY en .env
+
+# 3. Levantar la app (construye backend + frontend; la 1ª vez el npm build tarda)
+make up
+
+# 4. Cargar los datos a la BD (idempotente; solo si necesitas (re)cargar)
+make docker-etl
+
+Luego abres http://localhost:3002.
+
 ```
 
-Requiere la base `zeny-db` levantada (`../pgDataBase`, `docker compose up -d`).
 
 ## Documentos
 - [`docs/PLAN.md`](docs/PLAN.md): plan, arquitectura y estado (§12).
