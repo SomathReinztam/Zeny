@@ -31,6 +31,12 @@ class Settings(BaseSettings):
 
     cors_origins: str = "http://localhost:3002"
 
+    # Observabilidad
+    log_level: str = "INFO"
+    langfuse_public_key: str | None = None
+    langfuse_secret_key: str | None = None
+    langfuse_host: str = "http://localhost:3010"
+
     @property
     def dsn(self) -> str:
         return (

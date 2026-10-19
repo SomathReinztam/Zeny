@@ -1,0 +1,98 @@
+"""Observabilidad: logging estructurado + callbacks de LangChain.
+
+Dos capas complementarias:
+- Logs (siempre activos): arranque, errores de LLM (p. ej. 429 de Gemini), errores de tool y
+  resultados de tool que empiezan con "ERROR". Esto cubre el punto ciego: cuando un subagente falla,
+  LangGraph convierte el error en texto y el agente principal simplemente termina, sin traza en consola.
+- Langfuse (opcional): si hay credenciales en el entorno, se añade su callback para ver el árbol de
+  cada corrida (agente, subagentes, tools, SQL, tokens, latencias, errores).
+
+Ambas se enchufan como callbacks de LangChain, que se propagan a subagentes y tools.
+"""
+import logging
+import sys
+
+from langchain_core.callbacks import BaseCallbackHandler
+
+from app.settings import settings
+
+log = logging.getLogger("zeny")
+
+
+def configurar_logging() -> None:
+    """Configura el logger 'zeny' hacia stdout. Idempotente (sobrevive a --reload)."""
+    nivel = getattr(logging, settings.log_level.upper(), logging.INFO)
+    root = logging.getLogger()
+    if not any(getattr(h, "_zeny", False) for h in root.handlers):
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setFormatter(
+            logging.Formatter("%(asctime)s %(levelname)-7s %(name)s | %(message)s", "%H:%M:%S")
+        )
+        handler._zeny = True  # type: ignore[attr-defined]
+        root.addHandler(handler)
+    root.setLevel(min(nivel, logging.INFO))
+    log.setLevel(nivel)
+
+
+def _etiqueta(kwargs: dict) -> str:
+    """Nombre de la tool/modelo y el subagente (si lo hay) para correlacionar en los logs."""
+    nombre = kwargs.get("name") or "?"
+    meta = kwargs.get("metadata") or {}
+    nodo = meta.get("langgraph_node") or meta.get("checkpoint_ns", "")
+    return f"{nombre}" + (f" [{nodo}]" if nodo else "")
+
+
+class LogCallback(BaseCallbackHandler):
+    """Registra los errores que de otro modo quedarían tragados en la capa de tools/LLM."""
+
+    def on_llm_error(self, error, **kwargs):  # noqa: ANN001
+        log.error("Error de LLM en %s: %r", _etiqueta(kwargs), error)
+
+    def on_tool_error(self, error, **kwargs):  # noqa: ANN001
+        log.error("Error de tool %s: %r", _etiqueta(kwargs), error)
+
+    def on_tool_end(self, output, **kwargs):  # noqa: ANN001
+        texto = output if isinstance(output, str) else getattr(output, "content", None)
+        if isinstance(texto, str) and texto.lstrip().startswith("ERROR"):
+            log.warning("La tool %s devolvió un error: %s", _etiqueta(kwargs), texto[:300])
+
+    def on_retry(self, retry_state, **kwargs):  # noqa: ANN001
+        log.warning(
+            "Reintento en %s (intento %s): %r",
+            _etiqueta(kwargs),
+            getattr(retry_state, "attempt_number", "?"),
+            getattr(retry_state, "outcome", None),
+        )
+
+
+def _langfuse_handler():
+    """Devuelve el callback de Langfuse si hay credenciales, o None. Soporta SDK v3 y v2."""
+    if not (settings.langfuse_public_key and settings.langfuse_secret_key):
+        return None
+    try:
+        try:
+            from langfuse.langchain import CallbackHandler  # SDK v3+ (lee claves del entorno)
+
+            handler = CallbackHandler()
+        except ImportError:
+            from langfuse.callback import CallbackHandler  # SDK v2
+
+            handler = CallbackHandler(
+                public_key=settings.langfuse_public_key,
+                secret_key=settings.langfuse_secret_key,
+                host=settings.langfuse_host,
+            )
+        log.info("Langfuse activo (host=%s)", settings.langfuse_host)
+        return handler
+    except Exception as e:  # noqa: BLE001 — Langfuse nunca debe tumbar el agente
+        log.warning("Langfuse configurado pero no se pudo inicializar: %r", e)
+        return None
+
+
+def construir_callbacks() -> list[BaseCallbackHandler]:
+    """Callbacks para la corrida del grafo: logging siempre, Langfuse si está configurado."""
+    callbacks: list[BaseCallbackHandler] = [LogCallback()]
+    lf = _langfuse_handler()
+    if lf is not None:
+        callbacks.append(lf)
+    return callbacks
