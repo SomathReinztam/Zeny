@@ -23,8 +23,9 @@ frontend/node_modules
 frontend/.next
 frontend
 
-# Datos y documentación pesada (los datos se montan como volumen en el ETL)
+# Datos y documentación pesada (los datos se montan como volumen en el ETL, no van en la imagen)
 data
+docs/data
 docs/*.sse
 *.mkv
 

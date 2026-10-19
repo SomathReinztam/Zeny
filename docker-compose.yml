@@ -59,7 +59,7 @@ services:
     environment:
       DB_HOST: host.docker.internal
       DB_PORT: "5434"
-    # Los .xlsx están FUERA del repo: se montan de solo lectura.
+    # Los .xlsx viven en docs/data (relativo al repo): se montan de solo lectura en /data.
     volumes:
-      - /home/somath/Documents/dev/Zentrack/data/Reportes-minigranja-Joropo:/data/Reportes-minigranja-Joropo:ro
-    command: python -m etl.cargar_xlsx --dir /data/Reportes-minigranja-Joropo
+      - ./docs/data:/data:ro
+    command: python -m etl.cargar_xlsx --dir /data

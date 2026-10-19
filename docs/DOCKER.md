@@ -79,6 +79,6 @@ NEXT_PUBLIC_AGUI_URL=http://192.168.X.Y:8100/agui docker compose up -d --build f
   `docker exec -e LANGFUSE_DB_PASS='...' -i zeny-db psql -U postgres -d postgres < db/langfuse_init.sql`.
 - Langfuse corre sus **migraciones** automáticamente al arrancar sobre la base `langfuse`.
 - El servicio `etl` tiene `profiles: ["tools"]`: **no** arranca con `make up`; se corre a demanda
-  con `make docker-etl`. Monta los `.xlsx` de solo lectura desde
-  `../data/Reportes-minigranja-Joropo`.
+  con `make docker-etl`. Monta los `.xlsx` de solo lectura desde `./docs/data` (relativo al repo,
+  ignorado por git) hacia `/data` en el contenedor. Para cargar otros datos, deja los `.xlsx` ahí.
 - La pila de Langfuse usa volúmenes nombrados propios (`zeny-langfuse_langfuse_*`); no toca los de la app.
